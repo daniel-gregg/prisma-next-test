@@ -9,3 +9,39 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+// For details on the prisma schema requirements google 'prisma-schema-reference'
+model Post {
+  id  String @id @default(cuid())
+  title String 
+  content String? @db.Text //question mark denotes an optional variable
+  published Boolean @default(false)
+  comments Comment[]
+  author User @relation(fields: [authorId], references:[id])
+  authorId String
+  categories Category[] //creates an array for categories - Category must be defined as a table
+
+
+  @@map("posts") //This creates a mapping to from a call to 'posts' to the Post table here
+}
+
+model Comment {
+  id String  @id @default(cuid())
+  content String?
+  post Post? @relation(fields: [postId], references: [id]) //there must be a field 'postId' on this model. this statement indicates that the 'postId' is a one to one relation to id column on the Post table
+  postId  String?
+  published Boolean @default(false)
+}
+
+model User {
+  id String @id @default(cuid())
+  firstName String
+  lastName String
+  posts Post[]
+}
+
+model Category{
+  id Int @id @default(autoincrement())
+  name String
+  posts Post[]
+}
